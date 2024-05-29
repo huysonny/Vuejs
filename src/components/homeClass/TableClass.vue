@@ -4,23 +4,17 @@
       <thead>
         <tr>
           <th>STT</th>
-          <th>Tên</th>
-          <th>Tuổi</th>
           <th>Lớp</th>
-          <th>Ngày sinh</th>
           <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(student, index) in paginatedStudents" :key="index">
-          <td>{{ currentPage * pageSize + index + 1 }}</td>
-          <td>{{ student.name }}</td>
-          <td>{{ student.age }}</td>
-          <td>{{ student.class }}</td>
-          <td>{{ student.dateofbirth }}</td>
+        <tr v-for="(classItem, index) in paginatedClasses" :key="classItem.classname">
+          <td>{{ index + currentPage * pageSize+1}}</td>
+          <td>{{ classItem.classname }}</td>
           <td class="button_table">
-            <button type="button" class="btn btn-primary" @click="editStudent(index + currentPage * pageSize)">Sửa</button>
-            <button type="button" class="btn btn-danger" @click="deleteStudent(index + currentPage * pageSize)">Xoá</button>
+            <button type="button" class="btn btn-primary" @click="editClass(index + currentPage * pageSize)">Sửa</button>
+            <button type="button" class="btn btn-danger" @click="deleteClass(index + currentPage * pageSize)">Xoá</button>
           </td>
         </tr>
       </tbody>
@@ -34,12 +28,12 @@
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 
 export default {
-  name: 'TableStudent',
+  name: 'TableClass',
   props: {
-    students: {
+    listClass: {
       type: Array,
       required: true
     }
@@ -48,12 +42,12 @@ export default {
     const pageSize = ref(3);
     const currentPage = ref(0);
 
-    const totalPages = computed(() => Math.ceil(props.students.length / pageSize.value));
+    const totalPages = computed(() => Math.ceil(props.listClass.length / pageSize.value));
 
-    const paginatedStudents = computed(() => {
+    const paginatedClasses = computed(() => {
       const start = currentPage.value * pageSize.value;
       const end = start + pageSize.value;
-      return props.students.slice(start, end);
+      return props.listClass.slice(start, end);
     });
 
     const prevPage = () => {
@@ -68,30 +62,34 @@ export default {
       }
     };
 
-    const deleteStudent = (index) => {
-      emit('delete-student', index);
+    const deleteClass = (index) => {
+      emit('delete-class', index);
     };
 
-    const editStudent = (index) => {
-      emit('edit-status-student');
-      emit('edit-input-student', index);
+    const editClass = (index) => {
+      emit('edit-status-class');
+      emit('edit-input-class', index);
     };
 
-    watch(props.students, () => {
+    onMounted(() => {
+      console.log("check props >>", props.listClass);
+    });
+
+    watch(props.listClass, () => {
       if (currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
       }
     });
 
     return {
-      paginatedStudents,
+      paginatedClasses,
       currentPage,
       totalPages,
-      pageSize,
       prevPage,
       nextPage,
-      deleteStudent,
-      editStudent
+      pageSize,
+      deleteClass,
+      editClass
     };
   }
 }
@@ -99,7 +97,7 @@ export default {
 
 <style scoped>
 .tableStudent {
-  margin-top: 20px;
+  margin-top: 20px; 
 }
 .button_table {
   display: flex;
