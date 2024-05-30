@@ -65,14 +65,14 @@ export default {
     const addNewClass = (newClass) => {
       listClass.value = [...listClass.value, newClass];
       saveClass();
-      toast('add sucessfully ',{autoClose:1000})
+      toast('add class sucessfully ',{autoClose:1000})
     };
 
     const listClass = ref(loadClass());
     const deleteClass = (index) => {
       listClass.value.splice(index, 1);
       saveClass();
-      toast('delete sucessfully ',{autoClose:1000})
+      toast('delete class sucessfully ',{autoClose:1000})
     };
 
     const editStatusClass = () => {
@@ -88,7 +88,7 @@ export default {
        listClass.value[index] = updatedStudent;
        
       }
-      toast('update sucessfully ',{autoClose:1000})
+      toast('update class sucessfully ',{autoClose:1000})
       saveClass();
       handleChangeAddingState();
     };
