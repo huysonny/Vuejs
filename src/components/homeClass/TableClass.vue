@@ -13,8 +13,8 @@
           <td>{{ index + currentPage * pageSize + 1 }}</td>
           <td>{{ classItem.indentedName }}</td>
           <td class="button_table">
-            <button type="button" class="btn btn-primary" @click="editClass(index + currentPage * pageSize)">Sửa</button>
-            <button type="button" class="btn btn-danger" @click="deleteClass(index + currentPage * pageSize)">Xoá</button>
+            <button type="button" class="btn btn-primary" @click="editClass(classItem.id)">Sửa</button>
+            <button type="button" class="btn btn-danger" @click="deleteClass(classItem.id)">Xoá</button>
           </td>
         </tr>
       </tbody>

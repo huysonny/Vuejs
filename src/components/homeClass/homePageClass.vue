@@ -74,10 +74,15 @@ export default {
       toast("add class successfully", { autoClose: 1000 });
     };
 
-    const deleteClass = (index) => {
-      listClass.value.splice(index, 1);
-      saveClass();
-      toast("delete class successfully", { autoClose: 1000 });
+      const deleteClass = (id) => {
+      const index = listClass.value.findIndex(item => item.id === id);
+      if (index !== -1) {
+        listClass.value.splice(index, 1);
+        saveClass();
+        toast("delete class successfully", { autoClose: 1000 });
+      } else {
+        toast("class not found", { autoClose: 1000 });
+      }
     };
 
     const editStatusClass = () => {
@@ -85,7 +90,8 @@ export default {
     };
 
     const editInputClass = (index) => {
-      class1.value = listClass.value[index];
+      
+      class1.value = listClass.value.find(item=>item.id===index);
     };
 
     const editClass = (updatedStudent) => {
