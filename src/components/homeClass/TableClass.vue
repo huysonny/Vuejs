@@ -9,9 +9,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(classItem, index) in paginatedClasses" :key="classItem.classname">
-          <td>{{ index + currentPage * pageSize+1}}</td>
-          <td>{{ classItem.classname }}</td>
+        <tr v-for="(classItem, index) in paginatedClasses" :key="classItem.id">
+          <td>{{ index + currentPage * pageSize + 1 }}</td>
+          <td>{{ classItem.indentedName }}</td>
           <td class="button_table">
             <button type="button" class="btn btn-primary" @click="editClass(index + currentPage * pageSize)">Sửa</button>
             <button type="button" class="btn btn-danger" @click="deleteClass(index + currentPage * pageSize)">Xoá</button>
@@ -44,10 +44,21 @@ export default {
 
     const totalPages = computed(() => Math.ceil(props.listClass.length / pageSize.value));
 
+   
+    const addIndentation = (classes, group = null, level = 0) => {
+      let result = [];
+      for (let classItem of classes.filter(cls => cls.group === group)) {
+        result.push({ ...classItem, indentedName: '--'.repeat(level) + classItem.classname });
+        result = result.concat(addIndentation(classes, classItem.id, level + 1));
+      }
+      return result;
+    };
+
     const paginatedClasses = computed(() => {
+      const indentedClasses = addIndentation(props.listClass);
       const start = currentPage.value * pageSize.value;
       const end = start + pageSize.value;
-      return props.listClass.slice(start, end);
+      return indentedClasses.slice(start, end);
     });
 
     const prevPage = () => {

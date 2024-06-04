@@ -1,6 +1,6 @@
 <template>
   <div class="add-student-container">
-    <h2>{{ $props.isAdding ? "Thêm mới" : "Chỉnh sua" }}</h2>
+    <h2>{{ isAdding ? "Thêm mới" : "Chỉnh sửa" }}</h2>
     <div class="form-group">
       <label for="nameInput">Tên Lớp</label>
       <input
@@ -11,8 +11,17 @@
       />
     </div>
     <div class="form-group">
-      <label for="classInput">Thuộc:</label>
-      <input type="text" class="form-control" id="classInput" v-model="level" />
+      <label for="classSelect">Thuộc:</label>
+      <select class="form-control" id="classSelect" v-model="group">
+        <option value="">Chọn lớp</option>
+        <option
+          v-for="classItem in listClass"
+          :key="classItem.classname"
+          :value="classItem.id"
+        >
+          {{ classItem.classname }}
+        </option>
+      </select>
     </div>
     <button
       v-if="isAdding"
@@ -38,50 +47,63 @@ export default {
   name: "AddClass",
   props: {
     isAdding: {
-      require: true,
+      required: true,
       type: Boolean,
     },
     isEditing: {
-      require: true,
+      required: true,
       type: Boolean,
     },
     class1: {
-      return: true,
+      required: true,
       type: Object,
     },
   },
   setup(props, { emit }) {
-    const level = ref("");
+    const group = ref("");
     const className = ref("");
 
     const saveClass = () => {
       const newClass = {
         classname: className.value,
-        level: level.value,
+        group: group.value,
+        id:props.class1.id
       };
       emit("edit-class", newClass);
     };
+
+    const loadClass = () => {
+      const listclass = localStorage.getItem("listclass");
+      return listclass ? JSON.parse(listclass) : [];
+    };
+
+    const listClass = ref(loadClass());
+
     const addNewClass = () => {
+      console.log("check list", listClass);
+      let id = Math.max(...listClass.value.map((item) => item.id));
       const newClass = {
         classname: className.value,
-        level: level.value,
+        group: group.value,
+        id: id + 1,
       };
       emit("add-class", newClass);
       emit("handleChangeAddingState");
     };
 
     onMounted(() => {
-      console.log("?", props.class1);
-      if (!props.class1) return;
-      className.value = props.class1?.classname;
-      level.value = props.class1?.level;
+      if (props.class1) {
+        className.value = props.class1.classname;
+        group.value = props.class1.group;
+      }
     });
 
     return {
       className,
-      level,
+      group,
       addNewClass,
       saveClass,
+      listClass,
     };
   },
 };
