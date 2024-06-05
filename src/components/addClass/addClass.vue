@@ -8,17 +8,15 @@
         class="form-control"
         id="nameInput"
         v-model="className"
+        :class="{ 'is-invalid': nameError }"
       />
+      <div v-if="nameError" class="invalid-feedback">{{ nameError }}</div>
     </div>
     <div class="form-group">
       <label for="classSelect">Thuộc:</label>
       <select class="form-control" id="classSelect" v-model="group">
-        <option value="">Chọn lớp</option>
-        <option
-          v-for="classItem in listClass"
-          :key="classItem.classname"
-          :value="classItem.id"
-        >
+        <option value="">Chọn nhóm</option>
+        <option v-for="classItem in listClass" :key="classItem.classname" :value="classItem.id">
           {{ classItem.classname }}
         </option>
       </select>
@@ -42,6 +40,8 @@
 
 <script>
 import { onMounted, ref } from "vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "AddClass",
@@ -62,14 +62,32 @@ export default {
   setup(props, { emit }) {
     const group = ref("");
     const className = ref("");
+    const nameError = ref("");
+
+    const validateForm = () => {
+      let isValid = true;
+
+      if (className.value.length < 4 || className.value.length > 100) {
+        nameError.value = "Tên lớp phải có độ dài từ 4 đến 100 ký tự.";
+        toast.error(nameError.value);
+        isValid = false;
+      } else {
+        nameError.value = "";
+      }
+
+      return isValid;
+    };
 
     const saveClass = () => {
+      if (!validateForm()) return;
+
       const newClass = {
         classname: className.value,
         group: group.value,
-        id:props.class1.id
+        id: props.class1.id,
       };
       emit("edit-class", newClass);
+      
     };
 
     const loadClass = () => {
@@ -80,7 +98,8 @@ export default {
     const listClass = ref(loadClass());
 
     const addNewClass = () => {
-      console.log("check list", listClass);
+      if (!validateForm()) return;
+
       let id = Math.max(...listClass.value.map((item) => item.id));
       const newClass = {
         classname: className.value,
@@ -89,6 +108,7 @@ export default {
       };
       emit("add-class", newClass);
       emit("handleChangeAddingState");
+    
     };
 
     onMounted(() => {
@@ -104,6 +124,7 @@ export default {
       addNewClass,
       saveClass,
       listClass,
+      nameError,
     };
   },
 };
@@ -122,5 +143,15 @@ export default {
 
 .btn-secondary {
   margin-left: 10px;
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  display: block;
+  margin-top: 0.25rem;
 }
 </style>

@@ -3,19 +3,34 @@
     <h2>{{ isAdding ? "Thêm mới" : "Chỉnh sửa" }}</h2>
     <div class="form-group">
       <label for="nameInput">Tên học sinh:</label>
-      <input type="text" class="form-control" id="nameInput" v-model="name" />
+      <input
+        type="text"
+        class="form-control"
+        id="nameInput"
+        v-model="name"
+        :class="{ 'is-invalid': nameError }"
+      />
+      <div v-if="nameError" class="invalid-feedback">{{ nameError }}</div>
     </div>
     <div class="form-group">
       <label for="dobSelect">Ngày tháng năm sinh:</label>
       <div class="d-flex">
         <div class="select-container me-2">
-          <select class="form-control" v-model="dobDay">
+          <select
+            class="form-control"
+            v-model="dobDay"
+            :class="{ 'is-invalid': dobError }"
+          >
             <option value="" disabled selected>Ngày</option>
             <option v-for="day in 31" :key="day" :value="formatAsTwoDigits(day)">{{ formatAsTwoDigits(day) }}</option>
           </select>
         </div>
         <div class="select-container me-2">
-          <select class="form-control" v-model="dobMonth">
+          <select
+            class="form-control"
+            v-model="dobMonth"
+            :class="{ 'is-invalid': dobError }"
+          >
             <option value="" disabled selected>Tháng</option>
             <option v-for="month in 12" :key="month" :value="formatAsTwoDigits(month)">
               {{ formatAsTwoDigits(month) }}
@@ -23,7 +38,11 @@
           </select>
         </div>
         <div class="select-container">
-          <select class="form-control" v-model="dobYear">
+          <select
+            class="form-control"
+            v-model="dobYear"
+            :class="{ 'is-invalid': dobError }"
+          >
             <option value="" disabled selected>Năm</option>
             <option v-for="year in yearsRange" :key="year" :value="year">
               {{ year }}
@@ -31,19 +50,17 @@
           </select>
         </div>
       </div>
+      <div v-if="dobError" class="invalid-feedback">{{ dobError }}</div>
     </div>
     <div class="form-group">
       <label for="classSelect">Thuộc:</label>
-      <select class="form-control" id="classSelect" v-model="className">
+      <select class="form-control" id="classSelect" v-model="className" :class="{ 'is-invalid': classError }">
         <option value="">Chọn lớp</option>
-        <option
-          v-for="classItem in listClass"
-          :key="classItem.classname"
-          :value="classItem.classname"
-        >
+        <option v-for="classItem in listClass" :key="classItem.classname" :value="classItem.classname">
           {{ classItem.classname }}
         </option>
       </select>
+      <div v-if="classError" class="invalid-feedback">{{ classError }}</div>
     </div>
     <button
       v-if="isAdding"
@@ -62,9 +79,10 @@
   </div>
 </template>
 
-
 <script>
 import { ref, watch, onMounted } from "vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "AddStudent",
@@ -89,7 +107,43 @@ export default {
     const dobYear = ref("");
     const className = ref("");
 
+    const nameError = ref("");
+    const dobError = ref("");
+    const classError = ref("");
+
+    const validateForm = () => {
+      let isValid = true;
+      
+      if (name.value.length < 4 || name.value.length > 150) {
+        nameError.value = "Tên phải có độ dài từ 4 đến 150 ký tự.";
+        toast.error(nameError.value);
+        isValid = false;
+      } else {
+        nameError.value = "";
+      }
+
+      if (!dobDay.value || !dobMonth.value || !dobYear.value) {
+        dobError.value = "Vui lòng chọn ngày, tháng và năm sinh.";
+        toast.error(dobError.value);
+        isValid = false;
+      } else {
+        dobError.value = "";
+      }
+
+      if (!className.value) {
+        classError.value = "Vui lòng chọn lớp.";
+        toast.error(classError.value);
+        isValid = false;
+      } else {
+        classError.value = "";
+      }
+
+      return isValid;
+    };
+
     const saveStudent = () => {
+      if (!validateForm()) return;
+
       const dob = `${dobDay.value}/${dobMonth.value}/${dobYear.value}`;
       const age = calculateAge(dob);
 
@@ -100,6 +154,7 @@ export default {
         dateofbirth: dob,
       };
       emit("editStudent", updatedStudent);
+    
     };
 
     const loadClass = () => {
@@ -110,6 +165,8 @@ export default {
     const listClass = ref(loadClass());
 
     const addNewStudent = () => {
+      if (!validateForm()) return;
+
       const dob = `${dobDay.value}/${dobMonth.value}/${dobYear.value}`;
       const age = calculateAge(dob);
 
@@ -121,6 +178,7 @@ export default {
       };
       emit("add-student", newStudent);
       emit("handleChangeAddingState");
+     
     };
 
     const calculateAge = (dob) => {
@@ -186,7 +244,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .add-student-container {
   max-width: 400px;
@@ -213,5 +270,15 @@ export default {
 
 .me-2 {
   margin-right: 10px;
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  display: block;
+  margin-top: 0.25rem;
 }
 </style>
