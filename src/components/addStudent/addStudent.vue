@@ -56,7 +56,7 @@
       <label for="classSelect">Thuộc:</label>
       <select class="form-control" id="classSelect" v-model="className" :class="{ 'is-invalid': classError }">
         <option value="">Chọn lớp</option>
-        <option v-for="classItem in listClass" :key="classItem.classname" :value="classItem.classname">
+        <option v-for="classItem in listClass" :key="classItem.classname" :value="classItem.id">
           {{ classItem.classname }}
         </option>
       </select>
@@ -153,6 +153,7 @@ export default {
         class: className.value,
         dateofbirth: dob,
       };
+     
       emit("editStudent", updatedStudent);
     
     };
@@ -176,6 +177,7 @@ export default {
         class: className.value,
         dateofbirth: dob,
       };
+      console.log("clasName.value",className.value)
       emit("add-student", newStudent);
       emit("handleChangeAddingState");
      

@@ -16,7 +16,7 @@
           <td>{{ currentPage * pageSize + index + 1 }}</td>
           <td>{{ student.name }}</td>
           <td>{{ student.age }}</td>
-          <td>{{ student.class }}</td>
+          <td>{{ getClassName(student.class) }}</td>
           <td>{{ student.dateofbirth }}</td>
           <td class="button_table">
             <button type="button" class="btn btn-primary" @click="editStudent(index + currentPage * pageSize)">Sửa</button>
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 export default {
   name: 'TableStudent',
@@ -77,6 +77,22 @@ export default {
       emit('edit-input-student', index);
     };
 
+    const loadClass = () => {
+      const listclass = localStorage.getItem("listclass");
+      return listclass ? JSON.parse(listclass) : [];
+    };
+
+    const listClass = ref(loadClass());
+
+    const getClassName = (classId) => {
+      const classObj = listClass.value.find(c => c.id === classId);
+      return classObj ? classObj.classname : 'Unknown';
+    };
+
+    onMounted(()=>{
+      console.log("listclass ", listClass.value);
+    });
+
     watch(props.students, () => {
       if (currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
@@ -91,7 +107,8 @@ export default {
       prevPage,
       nextPage,
       deleteStudent,
-      editStudent
+      editStudent,
+      getClassName
     };
   }
 }

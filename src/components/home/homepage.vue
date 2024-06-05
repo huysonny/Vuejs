@@ -51,11 +51,11 @@ export default {
     const student = ref();
     
     const defaultStudents = [
-      { name: "Đỗ An", age: 13, class: "Lớp 11A", dateofbirth: "01/01/2003" },
+      { name: "Đỗ An", age: 13, class: 3, dateofbirth: "01/01/2003" },
       {
         name: "Nguyễn Ngọc",
         age: 14,
-        class: "Lớp 12B",
+        class: 6,
         dateofbirth: "01/01/2003",
       },
     ];
