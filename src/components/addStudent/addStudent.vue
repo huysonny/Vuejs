@@ -1,9 +1,9 @@
 <template>
   <div class="add-student-container">
-    <h2>{{ $props.isAdding ? 'Thêm mới' : 'Chỉnh sửa' }}</h2>
+    <h2>{{ isAdding ? "Thêm mới" : "Chỉnh sửa" }}</h2>
     <div class="form-group">
       <label for="nameInput">Tên học sinh:</label>
-      <input type="text" class="form-control" id="nameInput" v-model="name">
+      <input type="text" class="form-control" id="nameInput" v-model="name" />
     </div>
     <div class="form-group">
       <label for="dobSelect">Ngày tháng năm sinh:</label>
@@ -11,19 +11,23 @@
         <div class="select-container me-2">
           <select class="form-control" v-model="dobDay">
             <option value="" disabled selected>Ngày</option>
-            <option v-for="day in 31" :key="day" :value="day">{{ day }}</option>
+            <option v-for="day in 31" :key="day" :value="formatAsTwoDigits(day)">{{ formatAsTwoDigits(day) }}</option>
           </select>
         </div>
         <div class="select-container me-2">
           <select class="form-control" v-model="dobMonth">
             <option value="" disabled selected>Tháng</option>
-            <option v-for="month in 12" :key="month" :value="month">{{ month }}</option>
+            <option v-for="month in 12" :key="month" :value="formatAsTwoDigits(month)">
+              {{ formatAsTwoDigits(month) }}
+            </option>
           </select>
         </div>
         <div class="select-container">
           <select class="form-control" v-model="dobYear">
             <option value="" disabled selected>Năm</option>
-            <option v-for="year in yearsRange" :key="year" :value="year">{{ year }}</option>
+            <option v-for="year in yearsRange" :key="year" :value="year">
+              {{ year }}
+            </option>
           </select>
         </div>
       </div>
@@ -41,95 +45,130 @@
         </option>
       </select>
     </div>
-    <button v-if="isAdding" type="button" class="btn btn-primary" @click="addNewStudent">Thêm</button>
-    <button v-else type="button" class="btn btn-primary" @click="saveStudent">Lưu</button>
-    <div class="btn btn-secondary" @click="$emit('handleChangeAddingState')">Quay lại</div>
+    <button
+      v-if="isAdding"
+      type="button"
+      class="btn btn-primary"
+      @click="addNewStudent"
+    >
+      Thêm
+    </button>
+    <button v-else type="button" class="btn btn-primary" @click="saveStudent">
+      Lưu
+    </button>
+    <div class="btn btn-secondary" @click="$emit('handleChangeAddingState')">
+      Quay lại
+    </div>
   </div>
 </template>
 
+
 <script>
-import { onMounted, ref } from 'vue';
+import { ref, watch, onMounted } from "vue";
 
 export default {
-  name: 'AddStudent', 
-  props:{  
+  name: "AddStudent",
+  props: {
     isAdding: {
-      require: true,
+      required: true,
       type: Boolean,
     },
     isEditing: {
-      require: true,
+      required: true,
       type: Boolean,
     },
     student: {
-      return: true,
-      type: Object
-    }
+      required: true,
+      type: Object,
+    },
   },
   setup(props, { emit }) {
-    const name = ref('');
-    const dobDay = ref('');
-    const dobMonth = ref('');
-    const dobYear = ref('');
-    const className = ref('');
-    
+    const name = ref("");
+    const dobDay = ref("");
+    const dobMonth = ref("");
+    const dobYear = ref("");
+    const className = ref("");
+
     const saveStudent = () => {
       const dob = `${dobDay.value}/${dobMonth.value}/${dobYear.value}`;
       const age = calculateAge(dob);
-      
-      const newStudent = {
+
+      const updatedStudent = {
         name: name.value,
         age: age,
         class: className.value,
-        dateofbirth: dob
+        dateofbirth: dob,
       };
-      emit('editStudent', newStudent);
+      emit("editStudent", updatedStudent);
     };
-    
+
     const loadClass = () => {
       const listclass = localStorage.getItem("listclass");
       return listclass ? JSON.parse(listclass) : [];
     };
 
     const listClass = ref(loadClass());
-    
+
     const addNewStudent = () => {
       const dob = `${dobDay.value}/${dobMonth.value}/${dobYear.value}`;
       const age = calculateAge(dob);
-      
+
       const newStudent = {
         name: name.value,
         age: age,
         class: className.value,
-        dateofbirth: dob
+        dateofbirth: dob,
       };
-      emit('add-student', newStudent);
-      emit('handleChangeAddingState');
+      emit("add-student", newStudent);
+      emit("handleChangeAddingState");
     };
-    
+
     const calculateAge = (dob) => {
-      const [day, month, year] = dob.split('/');
+      const [day, month, year] = dob.split("/");
       const today = new Date();
       const birthDate = new Date(year, month - 1, day);
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
         age--;
       }
       return age;
     };
 
-    const yearsRange = ref([...Array(new Date().getFullYear() - 1900 + 1).keys()].map(i => i + 1900).reverse());
+    const yearsRange = ref(
+      [...Array(new Date().getFullYear() - 1900 + 1).keys()]
+        .map((i) => i + 1900)
+        .reverse()
+    );
 
-    onMounted(() => {
-      if (!props.student) return;
-      const [day, month, year] = props.student.dateofbirth.split('/');
-      name.value = props.student.name;
-      dobDay.value = day;
-      dobMonth.value = month;
-      dobYear.value = year;
-      className.value = props.student.class;
-    });
+    const populateFormFields = () => {
+      if (props.student && !props.isAdding) {
+        const [day, month, year] = props.student.dateofbirth.split("/");
+        console.log("day , month, year", day, month, year);
+        console.log("props.student.class", props.student.class);
+        name.value = props.student.name;
+        dobDay.value = day;
+        dobMonth.value = month;
+        dobYear.value = year;
+        className.value = props.student.class;
+      } else {
+        name.value = "";
+        dobDay.value = "";
+        dobMonth.value = "";
+        dobYear.value = "";
+        className.value = "";
+      }
+    };
+
+    const formatAsTwoDigits = (value) => {
+      return value.toString().padStart(2, "0");
+    };
+
+    watch(() => props.student, populateFormFields);
+    onMounted(populateFormFields);
 
     return {
       name,
@@ -140,11 +179,13 @@ export default {
       addNewStudent,
       saveStudent,
       listClass,
-      yearsRange
+      yearsRange,
+      formatAsTwoDigits,
     };
-  }
-}
+  },
+};
 </script>
+
 
 <style scoped>
 .add-student-container {

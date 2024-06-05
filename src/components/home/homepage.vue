@@ -35,46 +35,54 @@
     />
   </div>
 </template>
+
 <script>
-import { ref } from "vue";
-import {toast} from 'vue3-toastify';
-import 'vue3-toastify/dist/index.css';
+import { ref, onMounted } from "vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 import TableStudent from "./TableStudent.vue";
 import AddStudent from "../addStudent/addStudent.vue";
+
 export default {
   name: "HomepageVue",
   setup() {
     const isAdding = ref(false);
     const isEditing = ref(false);
     const student = ref();
-    const loadStudents=()=>{
-      const students=localStorage.getItem('students');
-      if(students){
+    
+    const defaultStudents = [
+      { name: "Đỗ An", age: 13, class: "Lớp 11A", dateofbirth: "01/01/2003" },
+      {
+        name: "Nguyễn Ngọc",
+        age: 14,
+        class: "Lớp 12B",
+        dateofbirth: "01/01/2003",
+      },
+    ];
+
+    const loadStudents = () => {
+      const students = localStorage.getItem("students");
+      if (students) {
         return JSON.parse(students);
+      } else {
+        localStorage.setItem("students", JSON.stringify(defaultStudents));
+        return defaultStudents;
       }
-       return [
-        { name: "Đỗ An", age: 13, class: "11B1", dateofbirth: "01/01/2003" },
-        {
-          name: "Nguyễn Ngọc",
-          age: 14,
-          class: "12B2",
-          dateofbirth: "01/01/2003",
-        },
-      ];
-    }
+    };
+
     const handleChangeAddingState = () => {
       isAdding.value = false;
       isEditing.value = false;
       student.value = { name: '', age: '', class: '', dateofbirth: '' };
     };
 
-   
     const listStudent = ref(loadStudents());
-    const listStudent1= ref([...listStudent.value]);
+    const listStudent1 = ref([...listStudent.value]);
     const searchQuery = ref("");
-    const saveStudents=()=>{
-      localStorage.setItem('students',JSON.stringify(listStudent.value));
-    } 
+
+    const saveStudents = () => {
+      localStorage.setItem("students", JSON.stringify(listStudent.value));
+    };
 
     const search = () => {
       console.log("check search", searchQuery.value);
@@ -93,37 +101,44 @@ export default {
       listStudent.value.splice(index, 1);
       listStudent1.value.splice(index, 1);
       saveStudents();
-      toast('delete student sucessfully ',{autoClose:1000})
+      toast("delete student successfully", { autoClose: 1000 });
     };
+
     const addNewStudent = (newStudent) => {
-      // listStudent.value.push(newStudent);
-      listStudent.value=[...listStudent.value,newStudent];
+      listStudent.value = [...listStudent.value, newStudent];
       saveStudents();
-      toast('add student sucessfully ',{autoClose:3000})
+      toast("add student successfully", { autoClose: 3000 });
     };
 
     const editStatusStudent = () => {
-      isEditing.value = true
-     
-    }
-    
-    const editInputStudent=(index)=>{
-      student.value=listStudent.value[index];
-    }
-    
+      isEditing.value = true;
+    };
+
+    const editInputStudent = (index) => {
+      student.value = listStudent.value[index];
+    };
+
     const editStudent = (updatedStudent) => {
-      const index = listStudent.value.findIndex((s) => s.name === student.value.name);
+      const index = listStudent.value.findIndex(
+        (s) => s.name === student.value.name
+      );
       if (index !== -1) {
         listStudent.value[index] = updatedStudent;
-        const listStudent1Index = listStudent1.value.findIndex((s) => s.name === student.value.name);
+        const listStudent1Index = listStudent1.value.findIndex(
+          (s) => s.name === student.value.name
+        );
         if (listStudent1Index !== -1) {
           listStudent1.value[listStudent1Index] = updatedStudent;
         }
       }
-      toast('update student sucessfully ',{autoClose:1000})
+      toast("update student successfully", { autoClose: 1000 });
       saveStudents();
       handleChangeAddingState();
     };
+
+    onMounted(() => {
+      listStudent.value = loadStudents();
+    });
 
     return {
       listStudent,
@@ -138,7 +153,7 @@ export default {
       student,
       editStatusStudent,
       editInputStudent,
-      editStudent
+      editStudent,
     };
   },
   components: {

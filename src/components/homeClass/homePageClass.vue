@@ -90,7 +90,6 @@ export default {
     };
 
     const editInputClass = (index) => {
-      
       class1.value = listClass.value.find(item=>item.id===index);
     };
 
