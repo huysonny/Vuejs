@@ -56,8 +56,8 @@
       <label for="classSelect">Thuộc:</label>
       <select class="form-control" id="classSelect" v-model="className" :class="{ 'is-invalid': classError }">
         <option value="">Chọn lớp</option>
-        <option v-for="classItem in listClass" :key="classItem.classname" :value="classItem.id">
-          {{ classItem.classname }}
+        <option v-for="classItem in indentedClasses" :key="classItem.id" :value="classItem.id">
+          {{ classItem.indentedName }}
         </option>
       </select>
       <div v-if="classError" class="invalid-feedback">{{ classError }}</div>
@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -227,6 +227,17 @@ export default {
       return value.toString().padStart(2, "0");
     };
 
+    const addIndentation = (classes, group = null, level = 0) => {
+      let result = [];
+      for (let classItem of classes.filter(cls => cls.group === group)) {
+        result.push({ ...classItem, indentedName: '--'.repeat(level) + classItem.classname });
+        result = result.concat(addIndentation(classes, classItem.id, level + 1));
+      }
+      return result;
+    };
+
+    const indentedClasses = computed(() => addIndentation(listClass.value));
+
     watch(() => props.student, populateFormFields);
     onMounted(populateFormFields);
 
@@ -241,10 +252,12 @@ export default {
       listClass,
       yearsRange,
       formatAsTwoDigits,
+      indentedClasses,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .add-student-container {

@@ -9,7 +9,7 @@
           <button
             type="button"
             class="btn btn-primary"
-            @click="listStudent = search()"
+            @click="search()"
           >
             Tìm kiếm
           </button>
@@ -21,7 +21,7 @@
         </div>
       </div>
       <div>
-        <TableStudent :students="listStudent" @delete-student="deleteStudent" @edit-status-student="editStatusStudent" @edit-input-student="editInputStudent" />
+        <TableStudent :students="listStudent" @delete-student="deleteStudent" @edit-status-student="editStatusStudent" @edit-input-student="editInputStudent" :current-page="currentPage" @update:currentPage="currentPage = $event"/>
       </div>
     </div>
     <AddStudent
@@ -49,7 +49,8 @@ export default {
     const isAdding = ref(false);
     const isEditing = ref(false);
     const student = ref();
-    
+    const currentPage = ref(0);
+
     const defaultStudents = [
       { name: "Đỗ An", age: 13, class: 3, dateofbirth: "01/01/2003" },
       {
@@ -87,14 +88,14 @@ export default {
     const search = () => {
       console.log("check search", searchQuery.value);
       if (!searchQuery.value) {
-        return listStudent1.value;
+        listStudent.value = listStudent1.value;
       } else {
         const searchTerm = searchQuery.value.toLowerCase();
-        listStudent.value = listStudent.value.filter(
-          (student) => student.name.toLowerCase() === searchTerm
+        listStudent.value = listStudent1.value.filter(
+          (student) => student.name.toLowerCase().includes(searchTerm)
         );
-        return listStudent.value;
       }
+      currentPage.value = 0;
     };
 
     const deleteStudent = (index) => {
@@ -106,6 +107,7 @@ export default {
 
     const addNewStudent = (newStudent) => {
       listStudent.value = [...listStudent.value, newStudent];
+      listStudent1.value = [...listStudent1.value, newStudent];
       saveStudents();
       toast("add student successfully", { autoClose: 3000 });
     };
@@ -154,6 +156,7 @@ export default {
       editStatusStudent,
       editInputStudent,
       editStudent,
+      currentPage
     };
   },
   components: {

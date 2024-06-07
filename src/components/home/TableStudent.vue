@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, watch ,ref} from 'vue';
 
 export default {
   name: 'TableStudent',
@@ -42,29 +42,32 @@ export default {
     students: {
       type: Array,
       required: true
+    },
+    currentPage: {
+      type: Number,
+      required: true
     }
   },
   setup(props, { emit }) {
     const pageSize = ref(3);
-    const currentPage = ref(0);
 
     const totalPages = computed(() => Math.ceil(props.students.length / pageSize.value));
 
     const paginatedStudents = computed(() => {
-      const start = currentPage.value * pageSize.value;
+      const start = props.currentPage * pageSize.value;
       const end = start + pageSize.value;
       return props.students.slice(start, end);
     });
 
     const prevPage = () => {
-      if (currentPage.value > 0) {
-        currentPage.value--;
+      if (props.currentPage > 0) {
+        emit('update:currentPage', props.currentPage - 1);
       }
     };
 
     const nextPage = () => {
-      if (currentPage.value < totalPages.value - 1) {
-        currentPage.value++;
+      if (props.currentPage < totalPages.value - 1) {
+        emit('update:currentPage', props.currentPage + 1);
       }
     };
 
@@ -89,19 +92,14 @@ export default {
       return classObj ? classObj.classname : 'Unknown';
     };
 
-    onMounted(()=>{
-      console.log("listclass ", listClass.value);
-    });
-
     watch(props.students, () => {
-      if (currentPage.value >= totalPages.value) {
-        currentPage.value = totalPages.value - 1;
+      if (props.currentPage >= totalPages.value) {
+        emit('update:currentPage', totalPages.value - 1);
       }
     });
 
     return {
       paginatedStudents,
-      currentPage,
       totalPages,
       pageSize,
       prevPage,
